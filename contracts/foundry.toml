@@ -2,5 +2,28 @@
 src = "src"
 out = "out"
 libs = ["lib"]
+solc_version = "0.8.23"
+optimizer = true
+optimizer_runs = 200
+via_ir = false
+timeout = 300
+retries = 3
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+remappings = [
+    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/src/",
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "forge-std/=lib/forge-std/src/",
+    "reactive-lib/=lib/reactive-lib/src/"
+]
+
+[rpc_endpoints]
+arbitrum_sepolia = "https://sepolia-rollup.arbitrum.io/rpc"
+base_sepolia = "https://sepolia.base.org"
+reactive_testnet = "${REACTIVE_TESTNET_RPC_URL}"
+reactive_mainnet = "${REACTIVE_MAINNET_RPC_URL}"
+
+# Etherscan API keys (optional - only needed for verification)
+# Comment out this section if you don't have API keys
+# [etherscan]
+# arbitrum_sepolia = { key = "${ARBISCAN_API_KEY}" }
+# base_sepolia = { key = "${BASESCAN_API_KEY}" }

@@ -1,0 +1,112 @@
+No files changed, compilation skipped
+Warning: Multi chain deployment is still under development. Use with caution.
+Traces:
+  [2029249] → new Deploy@0x5b73C5498c1E3b4dbA84de0F1833c4a029d90519
+    └─ ← [Return] 10025 bytes of code
+
+  [879915] Deploy::run()
+    ├─ [0] VM::envUint("PRIVATE_KEY") [staticcall]
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::addr(<pk>) [staticcall]
+    │   └─ ← [Return] 0xB6937d744691065a9C4c50e15667eF1c46D9996b
+    ├─ [0] console::log("Deploying contracts...") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Deployer address:", 0xB6937d744691065a9C4c50e15667eF1c46D9996b) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("\n=== Deploying to Arbitrum Sepolia ===") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] VM::startBroadcast(<pk>)
+    │   └─ ← [Return]
+    ├─ [277031] → new OriginPriceReader@0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+    │   └─ ← [Return] 1382 bytes of code
+    ├─ [0] console::log("OriginPriceReader deployed at:", OriginPriceReader: [0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4]) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Chainlink feed address:", 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Note: Price reading skipped (deploy first, then verify manually)") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] VM::stopBroadcast()
+    │   └─ ← [Return]
+    ├─ [0] console::log("\n=== Deploying to Base Sepolia ===") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("NOTE: Set REACTIVE_EXECUTOR_ADDRESS before deploying destination contract") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("For now, using deployer address as placeholder") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] VM::envOr("REACTIVE_EXECUTOR_ADDRESS", 0xB6937d744691065a9C4c50e15667eF1c46D9996b) [staticcall]
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::envString("BASE_SEPOLIA_RPC_URL") [staticcall]
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::createFork("<rpc url>")
+    │   └─ ← [Return] 1
+    ├─ [0] VM::selectFork(1)
+    │   └─ ← [Return]
+    ├─ [0] VM::startBroadcast(<pk>)
+    │   └─ ← [Return]
+    ├─ [503164] → new OriginPriceReader@0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+    │   ├─ emit OwnershipTransferred(previousOwner: 0x0000000000000000000000000000000000000000, newOwner: 0xB6937d744691065a9C4c50e15667eF1c46D9996b)
+    │   └─ ← [Return] 2166 bytes of code
+    ├─ [0] console::log("DestinationPriceStore deployed at:", OriginPriceReader: [0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4]) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Reactive executor:", 0xB6937d744691065a9C4c50e15667eF1c46D9996b) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Decimals:", 8) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Description:", "ETH / USD") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] VM::stopBroadcast()
+    │   └─ ← [Return]
+    ├─ [0] console::log("\n=== Deployment Summary ===") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Origin Chain (Arbitrum Sepolia):") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("  OriginPriceReader:", OriginPriceReader: [0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4]) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("  Chainlink Feed:", 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("\nDestination Chain (Base Sepolia):") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("  DestinationPriceStore:", OriginPriceReader: [0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4]) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("  Reactive Executor:", 0xB6937d744691065a9C4c50e15667eF1c46D9996b) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] VM::toString(OriginPriceReader: [0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4]) [staticcall]
+    │   └─ ← [Return] "0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4"
+    ├─ [0] VM::toString(0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2) [staticcall]
+    │   └─ ← [Return] "0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2"
+    ├─ [0] VM::toString(OriginPriceReader: [0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4]) [staticcall]
+    │   └─ ← [Return] "0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4"
+    ├─ [0] VM::toString(0xB6937d744691065a9C4c50e15667eF1c46D9996b) [staticcall]
+    │   └─ ← [Return] "0xB6937d744691065a9C4c50e15667eF1c46D9996b"
+    ├─ [0] VM::writeFile("deployment-addresses.txt", "ORIGIN_CHAIN=Arbitrum Sepolia\nORIGIN_PRICE_READER=0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4\nORIGIN_CHAINLINK_FEED=0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2\n\nDESTINATION_CHAIN=Base Sepolia\nDESTINATION_PRICE_STORE=0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4\nREACTIVE_EXECUTOR=0xB6937d744691065a9C4c50e15667eF1c46D9996b\n")
+    │   └─ ← [Revert] vm.writeFile: the path deployment-addresses.txt is not allowed to be accessed for write operations
+    └─ ← [Revert] vm.writeFile: the path deployment-addresses.txt is not allowed to be accessed for write operations
+
+
+
+== Logs ==
+  Deploying contracts...
+  Deployer address: 0xB6937d744691065a9C4c50e15667eF1c46D9996b
+  
+=== Deploying to Arbitrum Sepolia ===
+  OriginPriceReader deployed at: 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+  Chainlink feed address: 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2
+  Note: Price reading skipped (deploy first, then verify manually)
+  
+=== Deploying to Base Sepolia ===
+  NOTE: Set REACTIVE_EXECUTOR_ADDRESS before deploying destination contract
+  For now, using deployer address as placeholder
+  DestinationPriceStore deployed at: 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+  Reactive executor: 0xB6937d744691065a9C4c50e15667eF1c46D9996b
+  Decimals: 8
+  Description: ETH / USD
+  
+=== Deployment Summary ===
+  Origin Chain (Arbitrum Sepolia):
+    OriginPriceReader: 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+    Chainlink Feed: 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2
+  
+Destination Chain (Base Sepolia):
+    DestinationPriceStore: 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+    Reactive Executor: 0xB6937d744691065a9C4c50e15667eF1c46D9996b
+Error: script failed: vm.writeFile: the path deployment-addresses.txt is not allowed to be accessed for write operations
