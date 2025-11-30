@@ -1,0 +1,66 @@
+No files changed, compilation skipped
+Traces:
+  [684818] → new SubscribeEvents@0x5b73C5498c1E3b4dbA84de0F1833c4a029d90519
+    └─ ← [Return] 3310 bytes of code
+
+  [23609] SubscribeEvents::run()
+    ├─ [0] VM::envUint("PRIVATE_KEY") [staticcall]
+    │   └─ ← [Return] <env var value>
+    ├─ [0] VM::addr(<pk>) [staticcall]
+    │   └─ ← [Return] 0xB6937d744691065a9C4c50e15667eF1c46D9996b
+    ├─ [0] VM::envOr("REACTIVE_CONTRACT_ADDRESS", 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4) [staticcall]
+    │   └─ ← [Return] <env var value>
+    ├─ [0] console::log("=== Subscribing RC_PriceSync to Chainlink Events ===") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("RC Contract Address:", 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("Deployer:", 0xB6937d744691065a9C4c50e15667eF1c46D9996b) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] console::log("\nSubscription Details:") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [250] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4::ORIGIN_CHAIN_ID() [staticcall]
+    │   └─ ← [Return] 421614 [4.216e5]
+    ├─ [0] console::log("  Origin Chain ID:", 421614 [4.216e5]) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [281] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4::ORIGIN_FEED() [staticcall]
+    │   └─ ← [Return] 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2
+    ├─ [0] console::log("  Origin Feed (Chainlink):", 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [184] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4::ANSWER_UPDATED_SIG() [staticcall]
+    │   └─ ← [Return] 0x0559884fd3a460db3073b7fc896ccd86f8d6c01a0b74c8f9ff67210f09bf2849
+    ├─ [0] VM::toString(2419754421309073239616474162343766509265875667866043168557627143617515563081 [2.419e75]) [staticcall]
+    │   └─ ← [Return] "2419754421309073239616474162343766509265875667866043168557627143617515563081"
+    ├─ [0] console::log("  Event Signature:", "2419754421309073239616474162343766509265875667866043168557627143617515563081") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [183] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4::DESTINATION_CHAIN_ID() [staticcall]
+    │   └─ ← [Return] 84532 [8.453e4]
+    ├─ [0] console::log("  Destination Chain ID:", 84532 [8.453e4]) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [2358] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4::destinationPriceStore() [staticcall]
+    │   └─ ← [Return] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+    ├─ [0] console::log("  Destination Price Store:", 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4) [staticcall]
+    │   └─ ← [Stop]
+    ├─ [0] VM::startBroadcast(<pk>)
+    │   └─ ← [Return]
+    ├─ [0] console::log("\nCalling subscribeToPriceUpdates()...") [staticcall]
+    │   └─ ← [Stop]
+    ├─ [187] 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4::subscribeToPriceUpdates()
+    │   └─ ← [Revert] EvmError: Revert
+    └─ ← [Revert] EvmError: Revert
+
+
+
+== Logs ==
+  === Subscribing RC_PriceSync to Chainlink Events ===
+  RC Contract Address: 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+  Deployer: 0xB6937d744691065a9C4c50e15667eF1c46D9996b
+  
+Subscription Details:
+    Origin Chain ID: 421614
+    Origin Feed (Chainlink): 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2
+    Event Signature: 2419754421309073239616474162343766509265875667866043168557627143617515563081
+    Destination Chain ID: 84532
+    Destination Price Store: 0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4
+  
+Calling subscribeToPriceUpdates()...
+Error: script failed: <empty revert data>

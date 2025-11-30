@@ -3,6 +3,7 @@ pragma solidity ^0.8.23;
 
 import {AbstractReactive} from "reactive-lib/abstract-base/AbstractReactive.sol";
 import {IReactive} from "reactive-lib/interfaces/IReactive.sol";
+import {ISubscriptionService} from "reactive-lib/interfaces/ISubscriptionService.sol";
 import {IPriceStore} from "./interfaces/IPriceStore.sol";
 
 /**
@@ -53,6 +54,38 @@ contract RC_PriceSync is AbstractReactive {
     constructor(address _destinationPriceStore) {
         require(_destinationPriceStore != address(0), "Invalid destination address");
         destinationPriceStore = _destinationPriceStore;
+        
+        // Subscribe to Chainlink events during deployment
+        _subscribeToPriceUpdates();
+    }
+    
+    /**
+     * @notice Internal function to subscribe to price updates
+     * @dev Called during construction to set up the subscription
+     *      Note: Subscription might fail if service is not available - that's OK,
+     *      subscription can be done manually via Reactive Network tools
+     */
+    function _subscribeToPriceUpdates() internal {
+        // Check if we're on Reactive Network (not in VM)
+        if (vm) {
+            // In VM mode, subscription service might not be available
+            // Subscription should be done via Reactive Network infrastructure
+            return;
+        }
+        
+        ISubscriptionService subscriptionService = ISubscriptionService(payable(SERVICE_ADDR));
+        
+        // Subscribe to AnswerUpdated events
+        // Note: This may revert if subscription service requires payment or special setup
+        // In that case, subscription should be done via Reactive Network dashboard/CLI
+        subscriptionService.subscribe(
+            ORIGIN_CHAIN_ID,           // chain_id: Arbitrum Sepolia
+            ORIGIN_FEED,                // _contract: Chainlink aggregator
+            uint256(ANSWER_UPDATED_SIG), // topic_0: Event signature
+            REACTIVE_IGNORE,            // topic_1: Ignore (catch all current values)
+            REACTIVE_IGNORE,            // topic_2: Ignore (catch all roundId values)
+            REACTIVE_IGNORE             // topic_3: Not used
+        );
     }
 
     /**
@@ -140,5 +173,15 @@ contract RC_PriceSync is AbstractReactive {
     function setDestination(address _newDestination) external {
         require(_newDestination != address(0), "Invalid address");
         destinationPriceStore = _newDestination;
+    }
+    
+    /**
+     * @notice Subscribe to Chainlink AnswerUpdated events (public function for re-subscription if needed)
+     * @dev This function subscribes the contract to monitor AnswerUpdated events
+     *      from the Chainlink aggregator on Arbitrum Sepolia
+     *      Note: Subscription also happens automatically in constructor
+     */
+    function subscribeToPriceUpdates() public {
+        _subscribeToPriceUpdates();
     }
 }

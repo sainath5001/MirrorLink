@@ -79,11 +79,21 @@ forge script script/Deploy.s.sol:Deploy --rpc-url base_sepolia --broadcast --ver
 ## Additional Test Transactions
 
 ### Manual Test Trigger (Base Sepolia)
-- **Transaction Hash**: `TBD`
+- **Transaction Hash**: `0xdd9a5c91b3afb08ed9dffc9fe5a5df5ad139106c8347500cfdf6b53527065fc4`
 - **Action**: Manual price update via TestTrigger script
+- **Block Number**: `34337263`
+- **Contract Address**: `0x8D47F346E4439E3a03fa574A9E8F40Acf0571Ee4`
+- **Function Called**: `updatePrice(uint80,int256,uint256,uint256,uint80)`
+- **Price Before**: `3000000` (0.03 USD with 8 decimals)
+- **Price After**: `4000000` (0.04 USD with 8 decimals)
+- **Round ID**: Updated from `3` to `4`
+- **Gas Used**: `49647`
+- **Gas Price**: `0.000215101 gwei`
+- **Cost**: `0.000000010679119347 ETH`
+- **Status**: ✅ Success
 - **Command**: 
 ```bash
-forge script script/TestTrigger.s.sol:TestTrigger --rpc-url base_sepolia --broadcast
+forge script script/TestTrigger.s.sol:TestTrigger --rpc-url $BASE_SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast
 ```
 
 ## Verification Links
@@ -106,4 +116,5 @@ forge script script/TestTrigger.s.sol:TestTrigger --rpc-url base_sepolia --broad
 - Keep this file updated as you execute the workflow
 - Include block numbers and timestamps for complete traceability
 - Document any failed transactions or retries
+
 

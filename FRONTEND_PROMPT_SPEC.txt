@@ -1,0 +1,303 @@
+PROJECT OVERVIEW
+MirrorLink is a cross-chain Chainlink price feed mirroring system that automatically syncs ETH/USD price data from Arbitrum Sepolia to Base Sepolia using Reactive Network infrastructure. The system monitors Chainlink price feed updates on the origin chain and automatically propagates them to the destination chain in real-time.
+
+TECH STACK - BACKEND/SMART CONTRACTS
+
+Development Framework:
+- Foundry (Forge, Cast, Anvil) - Ethereum development toolkit written in Rust
+- Solidity version 0.8.23
+- Forge testing framework for unit tests
+
+Smart Contract Libraries:
+- OpenZeppelin Contracts (Ownable for access control)
+- Chainlink Contracts (AggregatorV3Interface for price feed integration)
+- Reactive Network Library (AbstractReactive, IReactive, ISubscriptionService interfaces)
+
+Blockchain Networks:
+- Origin Chain: Arbitrum Sepolia (Chain ID: 421614)
+- Destination Chain: Base Sepolia (Chain ID: 84532)
+- Reactive Network: For cross-chain event monitoring and execution
+
+Smart Contracts Architecture:
+
+1. OriginPriceReader (Arbitrum Sepolia)
+   - Purpose: Reference contract that reads Chainlink price feeds on origin chain
+   - Address: Deployed on Arbitrum Sepolia
+   - Chainlink Feed Address: 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2 (ETH/USD)
+   - Functions: getLatestPrice(), getRoundPrice(uint80), getDecimals(), getDescription()
+   - Events: PriceRead(uint80 roundId, int256 answer, uint256 updatedAt)
+
+2. DestinationPriceStore (Base Sepolia)
+   - Purpose: Stores mirrored Chainlink price feed data on destination chain
+   - Access Control: Only Reactive executor can update prices, owner can update executor
+   - Implements: IPriceStore interface (AggregatorV3Interface compatible)
+   - State Variables: roundId, answer (int256), startedAt, updatedAt, answeredInRound, decimals (8), description
+   - Functions: 
+     * updatePrice(uint80, int256, uint256, uint256, uint80) - only reactive executor
+     * latestRoundData() - returns current price data
+     * getRoundData(uint80) - returns specific round data
+     * getLatestPrice() - convenience function
+     * setReactiveExecutor(address) - owner only
+   - Events: PriceUpdated(int256 oldPrice, int256 newPrice, uint80 roundId, uint256 updatedAt)
+   - Security: Prevents spam updates (requires price or roundId change)
+
+3. RC_PriceSync (Reactive Network)
+   - Purpose: Reactive contract that monitors Chainlink events and triggers cross-chain updates
+   - Architecture: Event-driven, inversion-of-control pattern
+   - Monitors: AnswerUpdated events from Chainlink aggregator on Arbitrum Sepolia
+   - Event Signature: 0x0559884fd3a460db3073b7fc896ccd86f8d6c01a0b74c8f9ff67210f09bf2849
+   - Functions:
+     * react(IReactive.LogRecord) - called automatically by Reactive Network when event detected
+     * subscribeToPriceUpdates() - subscribes to Chainlink AnswerUpdated events
+     * setDestination(address) - updates destination contract address
+   - Events: PriceSyncTriggered(uint80 roundId, int256 answer, uint256 updatedAt, address destination)
+   - Cross-chain: Automatically calls updatePrice() on DestinationPriceStore via Reactive Network infrastructure
+
+Deployment Process:
+- Foundry scripts in script/Deploy.s.sol
+- Environment variables required: PRIVATE_KEY, ARBITRUM_SEPOLIA_RPC_URL, BASE_SEPOLIA_RPC_URL, REACTIVE_EXECUTOR_ADDRESS
+- Deployment commands use forge script with --rpc-url and --broadcast flags
+- Contracts verified on block explorers (Arbiscan, Basescan)
+
+Testing:
+- Foundry test suite in test/PriceSync.t.sol
+- Tests cover: initialization, access control, price updates, spam prevention, event emissions, round data queries
+
+WORKFLOW - COMPLETE SYSTEM FLOW
+
+Step 1: Initial Setup and Deployment
+- Deploy OriginPriceReader on Arbitrum Sepolia with Chainlink feed address
+- Deploy DestinationPriceStore on Base Sepolia with Reactive executor address
+- Deploy RC_PriceSync on Reactive Network with DestinationPriceStore address
+- Fund Reactive contract with ETH for gas fees
+- Subscribe RC_PriceSync to monitor AnswerUpdated events from Chainlink aggregator on Arbitrum Sepolia
+
+Step 2: Event Monitoring
+- Reactive Network continuously monitors Arbitrum Sepolia for AnswerUpdated events
+- Event structure: AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 updatedAt)
+- When event detected, Reactive Network extracts: current price (topic_1), roundId (topic_2), updatedAt (data)
+
+Step 3: Price Update Trigger
+- Reactive Network automatically calls react() function on RC_PriceSync
+- Contract verifies event is from correct Chainlink feed and chain
+- Decodes event data: current price, roundId, updatedAt timestamp
+- Constructs full round data: roundId, answer, startedAt (approximated), updatedAt, answeredInRound
+
+Step 4: Cross-Chain Price Update
+- RC_PriceSync calls updatePrice() on DestinationPriceStore via Reactive Network cross-chain infrastructure
+- Reactive Network handles message passing to Base Sepolia
+- DestinationPriceStore validates caller is Reactive executor
+- Contract checks price or roundId changed (spam prevention)
+- Updates state: roundId, answer, startedAt, updatedAt, answeredInRound
+- Emits PriceUpdated event with old and new price
+
+Step 5: Price Verification
+- Users/applications can query DestinationPriceStore on Base Sepolia
+- latestRoundData() returns current mirrored price data
+- getRoundData(uint80) returns specific round data
+- Data format matches Chainlink AggregatorV3Interface for compatibility
+
+DATA STRUCTURES
+
+Price Data Format:
+- roundId: uint80 - Chainlink round identifier
+- answer: int256 - Price value (ETH/USD with 8 decimals, e.g., 2000e8 = $2000)
+- startedAt: uint256 - Timestamp when round started
+- updatedAt: uint256 - Timestamp when price was updated
+- answeredInRound: uint80 - Round ID in which answer was computed
+- decimals: uint8 - Always 8 for Chainlink ETH/USD feed
+- description: string - "ETH / USD"
+
+Event Log Structure (for Reactive Network):
+- _contract: address - Chainlink aggregator address
+- chain_id: uint256 - Origin chain ID (421614 for Arbitrum Sepolia)
+- topic_0: uint256 - Event signature hash
+- topic_1: uint256 - Current price (int256 encoded as uint256)
+- topic_2: uint256 - Round ID
+- data: bytes - Encoded updatedAt timestamp
+
+ENVIRONMENT VARIABLES AND CONFIGURATION
+
+Required Environment Variables:
+- PRIVATE_KEY: Deployer private key for contract deployment
+- ARBITRUM_SEPOLIA_RPC_URL: RPC endpoint for Arbitrum Sepolia
+- BASE_SEPOLIA_RPC_URL: RPC endpoint for Base Sepolia
+- REACTIVE_EXECUTOR_ADDRESS: Address of Reactive Network executor (for DestinationPriceStore)
+- REACTIVE_TESTNET_RPC_URL: Optional, for Reactive Network testnet
+- REACTIVE_MAINNET_RPC_URL: Optional, for Reactive Network mainnet
+- ARBISCAN_API_KEY: Optional, for contract verification
+- BASESCAN_API_KEY: Optional, for contract verification
+
+Network Configuration:
+- Arbitrum Sepolia RPC: https://sepolia-rollup.arbitrum.io/rpc
+- Base Sepolia RPC: https://sepolia.base.org
+- Chainlink ETH/USD Feed (Arbitrum Sepolia): 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2
+
+Block Explorers:
+- Arbitrum Sepolia: https://sepolia.arbiscan.io
+- Base Sepolia: https://sepolia.basescan.org
+
+FRONTEND REQUIREMENTS AND INTEGRATION POINTS
+
+User Interface Needs:
+1. Dashboard showing current mirrored price on Base Sepolia
+2. Real-time price updates when new Chainlink updates occur
+3. Price history visualization (roundId, price, timestamp)
+4. Network status indicators (Origin chain, Destination chain, Reactive Network)
+5. Transaction history viewer for price updates
+6. Contract addresses display and copy functionality
+7. Price comparison between origin and destination chains
+8. Round data explorer (query specific round IDs)
+
+Key Integration Points:
+- Read from DestinationPriceStore contract on Base Sepolia
+- Connect to Base Sepolia network (Chain ID: 84532)
+- Listen to PriceUpdated events for real-time updates
+- Display price in human-readable format (divide by 10^8 for USD)
+- Show timestamps in readable format
+- Display round IDs and update history
+
+Web3 Integration:
+- Wallet connection (MetaMask, WalletConnect, etc.)
+- Web3 provider for Base Sepolia (RPC: https://sepolia.base.org)
+- Contract ABI for DestinationPriceStore
+- Event listener for PriceUpdated events
+- Read functions: latestRoundData(), getRoundData(uint80), getLatestPrice(), decimals(), description()
+
+Optional Advanced Features:
+- Compare prices between origin (Arbitrum Sepolia) and destination (Base Sepolia)
+- Price chart visualization over time
+- Alert system for significant price changes
+- Transaction details viewer with links to Basescan
+- Subscription status indicator for Reactive Network
+- Gas cost tracking for price updates
+
+TECHNICAL SPECIFICATIONS FOR FRONTEND
+
+Contract Interface (ABI Functions):
+- latestRoundData() view returns (uint80, int256, uint256, uint256, uint80)
+- getRoundData(uint80) view returns (uint80, int256, uint256, uint256, uint80)
+- getLatestPrice() view returns (int256)
+- decimals() view returns (uint8)
+- description() view returns (string)
+- reactiveExecutor() view returns (address)
+- roundId() view returns (uint80)
+- answer() view returns (int256)
+- updatedAt() view returns (uint256)
+
+Event to Listen:
+- PriceUpdated(int256 oldPrice, int256 newPrice, uint80 roundId, uint256 updatedAt)
+- Indexed parameters: None (all parameters in data)
+
+Price Formatting:
+- Price is stored as int256 with 8 decimals
+- To display: price / 10^8 = USD value
+- Example: 200000000000 (2000e8) = $2000.00
+- Handle negative prices (though unlikely for ETH/USD)
+
+Timestamp Formatting:
+- Timestamps are Unix epoch (uint256)
+- Convert to human-readable date/time
+- Show relative time (e.g., "2 minutes ago")
+
+Network Details:
+- Network Name: Base Sepolia
+- Chain ID: 84532
+- Currency Symbol: ETH
+- RPC URL: https://sepolia.base.org
+- Block Explorer: https://sepolia.basescan.org
+
+DEPLOYMENT ADDRESSES (Example - Update with actual addresses)
+- OriginPriceReader: [Deployed address on Arbitrum Sepolia]
+- DestinationPriceStore: [Deployed address on Base Sepolia]
+- RC_PriceSync: [Deployed address on Reactive Network]
+- Chainlink Feed: 0xD30EF1a1D4fb1bEa3172B6b766a07F79844428A2
+
+TESTING AND VERIFICATION
+
+Test Scenarios Covered:
+- Contract initialization with correct parameters
+- Access control (only executor can update, only owner can change executor)
+- Price update functionality
+- Spam prevention (reject unchanged prices)
+- Event emission verification
+- Round data queries
+- Error handling for invalid inputs
+
+Manual Testing:
+- Deploy contracts to testnets
+- Verify initial price reading
+- Trigger manual price update via test script
+- Verify price propagation
+- Check event emissions on block explorer
+
+SUBSCRIPTION CONFIGURATION
+
+Reactive Network Subscription Parameters:
+- RC Contract Address: [RC_PriceSync address]
+- Chain ID: 421614 (Arbitrum Sepolia)
+- Contract to Monitor: 0xD30EF1a1D4fb1bEa3172B6B766a07F79844428A2
+- Event Signature: 0x0559884fd3a460db3073b7fc896ccd86f8d6c01a0b74c8f9ff67210f09bf2849
+- Event: AnswerUpdated(int256 indexed, uint256 indexed, uint256)
+- Topic Filters: Topic 0 = Event signature, Topics 1-3 = IGNORE (catch all)
+
+SCRIPT FILES AND AUTOMATION
+
+Deployment Scripts:
+- script/Deploy.s.sol: Main deployment script for both chains
+- deploy-commands.sh: Bash script for deployment
+- deploy-with-retry.sh: Deployment with retry logic
+- quick-deploy.sh: Alternative RPC endpoints deployment
+
+Utility Scripts:
+- get-contract-address.sh: Extract deployed contract addresses
+- Test scripts for manual price updates
+
+BUILD AND COMPILATION
+
+Foundry Configuration (foundry.toml):
+- Solidity version: 0.8.23
+- Optimizer: Enabled (200 runs)
+- Source directory: src
+- Output directory: out
+- Libraries: lib
+- Remappings for Chainlink, OpenZeppelin, Reactive lib
+
+Build Commands:
+- forge build: Compile contracts
+- forge test: Run test suite
+- forge script: Execute deployment scripts
+- forge fmt: Format code
+- forge snapshot: Gas usage analysis
+
+SECURITY CONSIDERATIONS
+
+Access Control:
+- DestinationPriceStore: Only Reactive executor can update prices
+- Owner can update executor address
+- Zero address validation
+
+Input Validation:
+- Price change or roundId change required (spam prevention)
+- Non-zero address validation for executor
+- Event verification in Reactive contract
+
+Gas Optimization:
+- Solidity optimizer enabled (200 runs)
+- Efficient storage layout
+- Minimal external calls
+
+MONITORING AND OBSERVABILITY
+
+Key Metrics to Track:
+- Price update frequency
+- Time between Chainlink update and mirror update
+- Gas costs per update
+- Failed update attempts
+- Contract balance (for Reactive Network)
+
+Events to Monitor:
+- PriceUpdated on DestinationPriceStore
+- PriceSyncTriggered on RC_PriceSync
+- AnswerUpdated on Chainlink aggregator (origin chain)
+
